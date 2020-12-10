@@ -1,6 +1,6 @@
 ﻿namespace MoviesApp.ViewModels
 {
-    public class DeleteActorViewModel : InputMovieViewModel
+    public class DeleteActorViewModel : InputActorViewModel
     {
 
     }
