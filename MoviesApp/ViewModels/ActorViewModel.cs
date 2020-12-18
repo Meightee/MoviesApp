@@ -1,4 +1,6 @@
-﻿namespace MoviesApp.ViewModels
+﻿using System;
+
+namespace MoviesApp.ViewModels
 {
     public class ActorViewModel : InputActorViewModel
     {
