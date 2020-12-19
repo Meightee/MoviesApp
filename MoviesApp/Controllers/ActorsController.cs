@@ -1,10 +1,14 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.ViewModels;
+using MoviesApp.Filters;
 
 namespace MoviesApp.Controllers
 {
@@ -12,25 +16,24 @@ namespace MoviesApp.Controllers
     {
         private readonly MoviesContext _context;
         private readonly ILogger<HomeController> _logger;
+        private readonly IMapper _mapper;
 
 
-        public ActorsController(MoviesContext context, ILogger<HomeController> logger)
+        public ActorsController(MoviesContext context, ILogger<HomeController> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
-            return View(_context.Actors.Select(a=> new ActorViewModel
-            {
-                Id = a.Id,
-                FirstName = a.FirstName,
-                LastName = a.LastName,
-                Birthday = a.Birthday
-            }).ToList());
+            var actors = _mapper.Map<IEnumerable<Actor>, IEnumerable<ActorViewModel>>(_context.Actors.ToList());
+            return View(actors);
         }
 
+        [HttpGet]
         public IActionResult Details(int? id)
         {
             if (id == null)
@@ -38,15 +41,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var viewModel = _context.Actors.Where(a => a.Id == id).Select(a => new ActorViewModel
-            {
-                Id = a.Id,
-                FirstName = a.FirstName,
-                LastName = a.LastName,
-                Birthday = a.Birthday
-            }).FirstOrDefault();
-
-
+            var viewModel = _mapper.Map<ActorViewModel>(_context.Actors.FirstOrDefault(a => a.Id == id));
             if (viewModel == null)
             {
                 return NotFound();
@@ -54,6 +49,7 @@ namespace MoviesApp.Controllers
 
             return View(viewModel);
         }
+
 
         public IActionResult Create()
         {
@@ -63,16 +59,12 @@ namespace MoviesApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AgeFilter]
         public IActionResult Create([Bind("Id, FirstName, LastName, Birthday")] InputActorViewModel inputModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(new Actor
-                {
-                    FirstName = inputModel.FirstName,
-                    LastName = inputModel.LastName,
-                    Birthday = inputModel.Birthday
-                });
+                _context.Add(_mapper.Map<Movie>(inputModel));
                 _context.SaveChanges();
 
                 return RedirectToAction(nameof(Index));
@@ -88,12 +80,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var editModel = _context.Actors.Where(a => a.Id == id).Select(a => new EditActorViewModel
-            {
-                FirstName = a.FirstName,
-                LastName = a.LastName,
-                Birthday = a.Birthday
-            }).FirstOrDefault();
+            var editModel = _mapper.Map<EditActorViewModel>(_context.Actors.FirstOrDefault(a => a.Id == id));
 
             if (editModel == null)
             {
@@ -111,14 +98,8 @@ namespace MoviesApp.Controllers
             {
                 try
                 {
-                    var actor = new Actor
-                    {
-                        Id = id,
-                        FirstName = editModel.FirstName,
-                        LastName = editModel.LastName,
-                        Birthday = editModel.Birthday
-                    };
-
+                    var actor = _mapper.Map<Actor>(editModel);
+                    actor.Id = id;
                     _context.Update(actor);
                     _context.SaveChanges();
                 }
@@ -138,6 +119,7 @@ namespace MoviesApp.Controllers
             return View(editModel);
         }
 
+        [HttpPost]
         public IActionResult Delete(int? id)
         {
             if (id == null)
@@ -145,12 +127,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var deleteModel = _context.Actors.Where(a => a.Id == id).Select(a => new DeleteActorViewModel
-            {
-                FirstName = a.FirstName,
-                LastName = a.LastName,
-                Birthday = a.Birthday
-            }).FirstOrDefault();
+            var deleteModel = _mapper.Map<DeleteActorViewModel>(_context.Actors.FirstOrDefault(m => m.Id == id));
 
             if (deleteModel == null)
             {
