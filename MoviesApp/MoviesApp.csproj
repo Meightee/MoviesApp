@@ -5,8 +5,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Models\IActorServices.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="AutoMapper" Version="10.1.1" />
       <PackageReference Include="automapper.extensions.microsoft.dependencyinjection" Version="8.1.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.1">
         <PrivateAssets>all</PrivateAssets>
@@ -69,6 +74,10 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Services\IActorService.cs" />
     </ItemGroup>
 
 </Project>
